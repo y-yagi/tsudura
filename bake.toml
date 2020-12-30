@@ -1,0 +1,25 @@
+[default]
+dependencies = ["build"]
+
+[test]
+command = ["go", "test", "-v", "./..."]
+
+[clean]
+command = ["go", "clean", "-testcache"]
+
+[build]
+command = ["go", "build"]
+dependencies = ["clean", "window_build"]
+
+[window_build]
+environments = ["GOOS=windows"]
+command = ["go", "build", "-ldflags", "-H windowsgui"]
+
+[install]
+command = ["go", "install"]
+
+[lint]
+dependencies = ["golangci-lint"]
+
+[golangci-lint]
+command = ["golangci-lint", "run", "-D", "errcheck"]
