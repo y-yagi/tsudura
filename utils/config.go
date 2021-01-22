@@ -7,4 +7,5 @@ type Config struct {
 	Region   string `toml:"region"`
 	Secret   string `toml:"secret"`
 	Token    string `toml:"token"`
+	AddOnly  bool   `toml:"addonly"`
 }

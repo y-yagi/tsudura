@@ -296,6 +296,10 @@ func download(path string, etag string) error {
 }
 
 func destroy(path string) error {
+	if cfg.AddOnly {
+		return nil
+	}
+
 	result, err := storageClient.Destroy(path)
 	if err != nil {
 		return err
