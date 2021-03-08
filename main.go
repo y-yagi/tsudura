@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,9 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/fsnotify/fsnotify"
 	"github.com/getlantern/systray"
-	"github.com/manifoldco/promptui"
 	"github.com/y-yagi/configure"
-	"github.com/y-yagi/goext/osext"
 	"github.com/y-yagi/rnotify"
 	"github.com/y-yagi/tsudura/db"
 	"github.com/y-yagi/tsudura/icon"
@@ -47,11 +44,15 @@ func init() {
 }
 
 func main() {
+	var err error
+
 	if len(cfg.Root) == 0 {
-		setupConfig()
+		if err = setupConfig(); err != nil {
+			fmt.Printf("%v\n", err)
+			return
+		}
 	}
 
-	var err error
 	logger, err = log.NewLogger(app)
 	if err != nil {
 		fmt.Printf("logger build failed: %v\n", err)
@@ -83,80 +84,6 @@ func main() {
 
 	systray.Run(onReady, onExit)
 	return
-}
-
-func setupConfig() {
-	var err error
-	validateNotExist := func(input string) error {
-		if len(input) < 1 {
-			return errors.New("Please input value")
-		}
-
-		result, err := osext.IsEmptyDir(input)
-		if err != nil || !result {
-			return errors.New("Please specify empty directory")
-		}
-
-		return nil
-	}
-
-	validateNotEmpty := func(input string) error {
-		if len(input) < 1 {
-			return errors.New("Please input value")
-		}
-		return nil
-	}
-
-	prompt := promptui.Prompt{
-		Label:    "Backup directory",
-		Validate: validateNotExist,
-	}
-	if cfg.Root, err = prompt.Run(); err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return
-	}
-
-	prompt = promptui.Prompt{
-		Label:    "Bucket",
-		Validate: validateNotEmpty,
-	}
-	if cfg.Bucket, err = prompt.Run(); err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return
-	}
-
-	prompt = promptui.Prompt{
-		Label:    "Region",
-		Default:  "us-east-1",
-		Validate: validateNotEmpty,
-	}
-	if cfg.Region, err = prompt.Run(); err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return
-	}
-
-	prompt = promptui.Prompt{
-		Label:    "Secret",
-		Validate: validateNotEmpty,
-	}
-	if cfg.Secret, err = prompt.Run(); err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return
-	}
-
-	prompt = promptui.Prompt{
-		Label:    "Token",
-		Validate: validateNotEmpty,
-	}
-	if cfg.Token, err = prompt.Run(); err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return
-	}
-
-	cfg.Endpoint = "https://s3.wasabisys.com"
-
-	// TODO(y-yagi): validate setting.
-	configure.Save(app, &cfg)
 }
 
 func onReady() {
