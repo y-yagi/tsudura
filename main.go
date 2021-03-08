@@ -249,7 +249,11 @@ func run() {
 				if !ok {
 					return
 				}
-				fmt.Printf("DEBUG: %v\n", event)
+
+				if cfg.Debug {
+					fmt.Printf("DEBUG: %v\n", event)
+				}
+
 				if event.Op&fsnotify.Remove == fsnotify.Remove || event.Op&fsnotify.Rename == fsnotify.Rename {
 					if err := destroy(event.Name); err != nil {
 						msg := fmt.Sprintf("delete error %v\n", err)

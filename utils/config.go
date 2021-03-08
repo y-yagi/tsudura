@@ -8,4 +8,5 @@ type Config struct {
 	Secret   string `toml:"secret"`
 	Token    string `toml:"token"`
 	AddOnly  bool   `toml:"addonly"`
+	Debug    bool   `toml:"debug"`
 }
